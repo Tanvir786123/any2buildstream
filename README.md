@@ -1,93 +1,188 @@
 # any2buildstream
+**Investigating AI-assisted migration from existing build systems to BuildStream.**
 
+## Overview
+`any2buildstream` is an exploratory project investigating the use of AI agents to automate software build-system
+migrations to [BuildStream](https://buildstream.build/).
 
+The initial focus is migrating projects from Bazel to BuildStream. The longer-term objective is to investigate a
+reusable approach that can be extended to other source build systems.
 
-## Getting started
+The project aims to determine how effectively AI agents can perform these migrations, how their work can be validated,
+and where human engineering expertise remains necessary.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+> **Project status:** Initial research and scaffolding. The migration
+> workflow, validation tooling, and experimental methodology have not
+> yet been implemented or evaluated.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Motivation
+Build-system migrations can require substantial engineering effort. They involve more than translating configuration
+files: dependencies, toolchains, compiler and linker options, generated files, and build behaviour must also be
+accounted for.
 
-## Add your files
+AI agents offer a potential way to streamline this process. However, generating a configuration that builds successfully
+does not necessarily mean that the migration is correct.
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+This project investigates how AI agents can assist with build-system migrations while retaining a systematic means of
+verifying their outputs.
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/Tanvir786123/any2buildstream.git
-git branch -M main
-git push -uf origin main
-```
+The motivation is informed by [EngFlow's work on AI-assisted Bazel migrations](
+    https://blog.engflow.com/2026/09/09/introducing-any2bazel-oss-bazel-migration-tool/), which explores the
+    capabilities and limitations of AI agents when migrating existing projects to Bazel.
 
-## Integrate with your tools
+`any2buildstream` explores a related problem from the perspective of migrating existing projects to BuildStream.
 
-* [Set up project integrations](https://gitlab.com/Tanvir786123/any2buildstream/-/settings/integrations)
+## Research question
+The primary research question is:
+> How effective are AI agents at migrating software projects between
+> build systems, and to what extent can this process be automated
+> without human intervention while preserving build correctness and
+> output equivalence?
 
-## Collaborate with your team
+The investigation will explore the following areas:
+- **Migration correctness:** Can agents produce valid BuildStream configurations that preserve the intended build
+behaviour?
+- **Validation:** How can build-graph analysis and artifact comparison help establish whether a migration is correct?
+- **Human intervention:** Where do agents require engineering assistance, and why?
+- **Model capabilities:** Which capabilities and failure modes appear consistently across different frontier models?
+- **Workflow effectiveness:** Can iterative, validation-guided migration reduce engineering effort compared with less
+interactive approaches?
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+The aim is not simply to identify the best-performing model, but to understand the capabilities and limitations of
+AI-assisted migration workflows.
 
-## Test and Deploy
+## Initial scope
+The initial scope is deliberately constrained to:
 
-Use the built-in continuous integration in GitLab.
+**Bazel → BuildStream**
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+This provides a defined starting point for investigating migration strategies, validation techniques, and agent
+behaviour.
 
-***
+The initial work will focus on selecting suitable test projects, establishing reference builds, and investigating how
+migration outputs can be validated systematically.
 
-# Editing this README
+The longer-term direction is to explore a generalisable approach:
+**Source build system → AI-assisted migration → BuildStream**
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+The initial implementation and its assumptions should not unnecessarily couple the overall architecture to Bazel.
+However, supporting arbitrary source build systems is outside the initial scope.
 
-## Suggestions for a good README
+## Proposed approach
+The project will investigate a workflow consisting of the following stages.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### 1. Analyse the source project
+Inspect the existing Bazel configuration to identify relevant build targets, dependencies, toolchains, compiler options,
+generated files, and expected outputs.
 
-## Name
-Choose a self-explaining name for your project.
+### 2. Generate the BuildStream configuration
+Provide an AI agent with a consistent environment, migration prompt, and set of available tools.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+The agent will use this information to generate the BuildStream project configuration and required element files.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### 3. Build and validate
+Evaluate the resulting migration using a combination of build execution, build-graph analysis, and artifact comparison.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Validation results should provide actionable feedback that can be used to investigate and correct migration failures.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### 4. Evaluate human intervention
+Record where human assistance is required, the nature of the intervention, and its effect on the final result.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+This will help distinguish migrations that can be completed autonomously from those that require engineering judgement.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### 5. Compare experimental results
+Evaluate different models and agent configurations against consistent projects, prompts, environments, and acceptance
+criteria.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+The results will be used to investigate recurring capabilities, limitations, and failure modes.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## Validation
+A central objective is to establish whether a migration is correct, rather than merely whether it builds.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+The proposed validation strategy consists of several complementary approaches.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Build success
+Verify that the original Bazel project and migrated BuildStream project can build the required targets.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+Build success is a necessary condition, but is not sufficient to establish migration correctness.
 
-## License
-For open source projects, say how it is licensed.
+### Build-graph comparison
+Investigate extracting build information from both systems and representing it in a common format.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+A normalised representation could enable comparisons of relevant build actions, dependencies, inputs, outputs, and
+command-line options.
+
+The comparison must account for legitimate differences between build systems without hiding meaningful changes in build
+behaviour.
+
+### Artifact comparison
+Investigate using [diffoscope](https://diffoscope.org/) to compare corresponding outputs produced by the original and
+migrated builds.
+
+This can help identify differences in executables, libraries, and other build artifacts.
+
+Differences must be interpreted in context, accounting for factors such as toolchain versions, build configuration,
+timestamps, and non-deterministic build steps.
+
+### Functional testing
+Where suitable tests exist, run them against both builds to provide additional evidence that the migrated project
+retains its intended behaviour.
+
+The final validation criteria and the interpretation of discrepancies remain to be defined.
+
+## Experimental design
+The investigation will aim to provide a consistent basis for comparing AI agents.
+
+Areas to be established include:
+- Selection of representative Bazel test projects.
+- Reference BuildStream migrations for evaluating correctness.
+- Selection of a small number of frontier models.
+- A standardised migration prompt and agent environment.
+- Consistent execution limits and available tooling.
+- Repeatable experiments and structured result collection.
+- Metrics for migration success, engineering effort, and human
+  intervention.
+
+The intention is to investigate capabilities and failure modes across different models, rather than to produce a simple
+model ranking.
+
+## Planned milestones
+The following milestones describe the proposed direction of the project. They do not represent completed work.
+- [ ] **Initial investigation:** Review existing migration tools, BuildStream capabilities, and related research.
+- [ ] **Test projects:** Identify suitable Bazel projects and establish reproducible reference builds.
+- [ ] **Migration workflow:** Define the initial agent environment, prompt, tools, and expected BuildStream outputs.
+- [ ] **Prototype:** Implement an end-to-end Bazel-to-BuildStream migration workflow.
+- [ ] **Validation:** Investigate build-graph extraction, graph comparison, artifact comparison, and functional testing.
+- [ ] **Evaluation:** Run controlled experiments across selected models and test projects.
+- [ ] **Analysis:** Document migration success rates, recurring failure modes, human interventions, and limitations.
+- [ ] **Future direction:** Assess the feasibility of extending the approach to additional source build systems.
+
+Milestones may be refined as the initial investigation establishes technical feasibility and identifies the most useful
+areas of work.
+
+## Longer-term direction
+Although the initial focus is Bazel-to-BuildStream migration, the project aims to explore an approach that can be
+extended to additional build systems.
+
+Potential areas of future investigation include:
+- Additional source build systems and language ecosystems.
+- Reusable interfaces for extracting and comparing build information.
+- Improved validation feedback for AI agents.
+- More effective human-in-the-loop migration workflows.
+- Evaluation against larger and more complex software projects.
+
+Any extension beyond the initial scope will depend on the results of the initial prototype and evaluation.
+
+## References
+- [EngFlow: Introducing any2bazel, an OSS Bazel migration tool](
+    https://blog.engflow.com/2026/09/09/introducing-any2bazel-oss-bazel-migration-tool/)
+- [BuildStream documentation](https://docs.buildstream.build/)
+- [diffoscope](https://diffoscope.org/)
+- [BuildStream AOSP proof of concept](https://github.com/martinbrook/buildstream-aosp-poc)
+
+## Status and contributions
+This project is at an early exploratory stage. The proposed workflow, validation strategy, and experimental design are
+subject to refinement as the investigation progresses.
+
+Initial work will focus on establishing a tractable migration problem, identifying suitable reference projects, and
+demonstrating a reproducible end-to-end workflow.
